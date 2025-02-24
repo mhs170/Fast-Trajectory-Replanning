@@ -139,7 +139,7 @@ class GridWorld:
         ax.grid(which="minor", color="black", linestyle='-', linewidth=0.2)
         ax.set_xticklabels([])
         ax.set_yticklabels([])
-        plt.title("GridWorld Visualization (Start: Lime, Target: Red)")
+        plt.title("GridWorld Visualization")
         plt.show()
 
 if __name__ == "__main__":
