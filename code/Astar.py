@@ -99,3 +99,14 @@ if __name__ == "__main__":
     
     print(f"Expanded nodes (high g-values): {high_g_expansion}")
     print(f"Expanded nodes (low g-values): {low_g_expansion}")
+
+if __name__ == "__main__":
+    for i in range(1, 51):
+        filename = f"gridworld_{i}.txt"  
+        print(f"\nRunning experiment for {filename}:")
+        grid_world = GridWorld.load_from_file(filename)
+        high_g_expansion = RepeatedAStar(grid_world, tie_breaking='high_g').run_experiment()
+        low_g_expansion = RepeatedAStar(grid_world, tie_breaking='low_g').run_experiment()
+        
+        print(f"Expanded nodes (high g-values) for {filename}: {high_g_expansion}")
+        print(f"Expanded nodes (low g-values) for {filename}: {low_g_expansion}")
