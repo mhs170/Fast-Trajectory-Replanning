@@ -36,6 +36,13 @@ class GridNode:
     def f_cost(self):
         #Returns the total cost (g + h) for pathfinding.
         return self.g_cost + self.h_cost
+    
+    def __lt__(self, other):
+        # Compare f-cost first
+        if self.f_cost() != other.f_cost():
+            return self.f_cost() < other.f_cost()
+        # Tie-breaker: prefer nodes with a higher g-cost
+        return self.g_cost > other.g_cost
 
 class GridWorld:
     def __init__(self):
