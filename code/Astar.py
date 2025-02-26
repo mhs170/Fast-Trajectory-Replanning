@@ -1,7 +1,13 @@
 import heapq
 import numpy as np
 import os
-from gridworld_gen import GridWorld
+
+# Assuming gridworld_gen.py is in the same directory
+try:
+    from gridworld_gen import GridWorld
+except ImportError:
+    print("Error: gridworld_gen.py not found. Make sure it's in the same directory.")
+    exit()
 
 class PriorityQueue:
     def __init__(self):
@@ -25,6 +31,7 @@ class RepeatedAStar:
         self.closed_list = set()
         self.tie_breaking = tie_breaking
         self.initialize_nodes()
+        self.expanded_nodes = 0
     
     def initialize_nodes(self):
         for row in self.grid:
@@ -51,7 +58,10 @@ class RepeatedAStar:
             if current == self.target:
                 return self.reconstruct_path()
             
-            self.closed_list.add((current.x, current.y))
+            if (current.x, current.y) not in self.closed_list:
+                self.expanded_nodes += 1
+                self.closed_list.add((current.x, current.y))
+
             for neighbor in self.get_neighbors(current):
                 if (neighbor.x, neighbor.y) in self.closed_list or neighbor.node_type == 1:
                     continue
@@ -81,32 +91,31 @@ class RepeatedAStar:
         return path
     
     def run_experiment(self):
-        print(f"Running Repeated A* with tie-breaking {'high g-values' if self.tie_breaking == 'high_g' else 'low g-values'}")
-        path = self.search()
-        if path:
-            print(f"Path found with {len(path)} steps")
-        else:
-            print("No path found")
-        return len(path) if path else float('inf')
+        self.search()
+        return self.expanded_nodes
+
 
 if __name__ == "__main__":
-    filename = "gridworld_1.txt"  # Example grid file
-    grid_world = GridWorld.load_from_file(filename)
-    
-    print("Comparing tie-breaking strategies:")
-    high_g_expansion = RepeatedAStar(grid_world, tie_breaking='high_g').run_experiment()
-    low_g_expansion = RepeatedAStar(grid_world, tie_breaking='low_g').run_experiment()
-    
-    print(f"Expanded nodes (high g-values): {high_g_expansion}")
-    print(f"Expanded nodes (low g-values): {low_g_expansion}")
+    expanded_nodes_high_g = []
+    expanded_nodes_low_g = []
 
-if __name__ == "__main__":
     for i in range(1, 51):
         filename = f"gridworld_{i}.txt"  
         print(f"\nRunning experiment for {filename}:")
         grid_world = GridWorld.load_from_file(filename)
-        high_g_expansion = RepeatedAStar(grid_world, tie_breaking='high_g').run_experiment()
-        low_g_expansion = RepeatedAStar(grid_world, tie_breaking='low_g').run_experiment()
-        
-        print(f"Expanded nodes (high g-values) for {filename}: {high_g_expansion}")
-        print(f"Expanded nodes (low g-values) for {filename}: {low_g_expansion}")
+
+        repeated_a_star_high_g = RepeatedAStar(grid_world, tie_breaking='high_g')
+        high_g_expansions = repeated_a_star_high_g.run_experiment()
+        expanded_nodes_high_g.append(high_g_expansions)
+
+        repeated_a_star_low_g = RepeatedAStar(grid_world, tie_breaking='low_g')
+        low_g_expansions = repeated_a_star_low_g.run_experiment()
+        expanded_nodes_low_g.append(low_g_expansions)
+
+        print(f"Expanded nodes (high g-values) for {filename}: {high_g_expansions}")
+        print(f"Expanded nodes (low g-values) for {filename}: {low_g_expansions}")
+
+    print("\nExpanded nodes for all gridworlds:")
+    print("Gridworld, High g-values, Low g-values")
+    for i in range(50):
+        print(f"gridworld_{i+1}.txt, {expanded_nodes_high_g[i]}, {expanded_nodes_low_g[i]}")
