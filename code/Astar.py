@@ -1,8 +1,8 @@
 import heapq
 import numpy as np
 import os
+import time
 
-# Assuming gridworld_gen.py is in the same directory
 try:
     from gridworld_gen import GridWorld
 except ImportError:
@@ -45,9 +45,9 @@ class RepeatedAStar:
     
     def get_priority(self, node):
         if self.tie_breaking == 'high_g':
-            return node.g_cost + node.h_cost - node.g_cost * 1e-6  # Favor higher g-cost
-        else:
-            return node.g_cost + node.h_cost + node.g_cost * 1e-6  # Favor lower g-cost
+            return node.g_cost + node.h_cost - node.g_cost * 1e-6  
+        else:  # low g-values
+            return node.g_cost + node.h_cost + node.g_cost * 1e-6  
     
     def search(self):
         self.start.g_cost = 0
@@ -91,31 +91,51 @@ class RepeatedAStar:
         return path
     
     def run_experiment(self):
+        start_time = time.time()  
         self.search()
-        return self.expanded_nodes
+        end_time = time.time()  
+        runtime = end_time - start_time
+        return self.expanded_nodes, runtime
 
+class AdaptiveAStar(RepeatedAStar):
+    def __init__(self, gridworld, tie_breaking='high_g'):
+        super().__init__(gridworld, tie_breaking)
+        self.adaptive_h = {}
+    
+    def search(self):
+        path = super().search()
+        if path:
+            goal_g = self.target.g_cost
+            for node in self.closed_list:
+                x, y = node
+                self.grid[x][y].h_cost = goal_g - self.grid[x][y].g_cost
+        return path
 
 if __name__ == "__main__":
-    expanded_nodes_high_g = []
-    expanded_nodes_low_g = []
+    results = []
 
     for i in range(1, 51):
         filename = f"gridworld_{i}.txt"  
         print(f"\nRunning experiment for {filename}:")
         grid_world = GridWorld.load_from_file(filename)
 
-        repeated_a_star_high_g = RepeatedAStar(grid_world, tie_breaking='high_g')
-        high_g_expansions = repeated_a_star_high_g.run_experiment()
-        expanded_nodes_high_g.append(high_g_expansions)
 
-        repeated_a_star_low_g = RepeatedAStar(grid_world, tie_breaking='low_g')
-        low_g_expansions = repeated_a_star_low_g.run_experiment()
-        expanded_nodes_low_g.append(low_g_expansions)
+        repeated_high_g = RepeatedAStar(grid_world, tie_breaking='high_g')
+        high_g_expansions, high_g_time = repeated_high_g.run_experiment()
 
-        print(f"Expanded nodes (high g-values) for {filename}: {high_g_expansions}")
-        print(f"Expanded nodes (low g-values) for {filename}: {low_g_expansions}")
+        repeated_low_g = RepeatedAStar(grid_world, tie_breaking='low_g')
+        low_g_expansions, low_g_time = repeated_low_g.run_experiment()
 
-    print("\nExpanded nodes for all gridworlds:")
-    print("Gridworld, High g-values, Low g-values")
-    for i in range(50):
-        print(f"gridworld_{i+1}.txt, {expanded_nodes_high_g[i]}, {expanded_nodes_low_g[i]}")
+        adaptive_a_star = AdaptiveAStar(grid_world, tie_breaking='high_g')
+        adaptive_expansions, adaptive_time = adaptive_a_star.run_experiment()
+
+        results.append((filename, high_g_expansions, low_g_expansions, adaptive_expansions, high_g_time, low_g_time, adaptive_time))
+
+        print(f"Repeated A* (High G) - Expanded Nodes: {high_g_expansions}, Runtime: {high_g_time:.6f} sec")
+        print(f"Repeated A* (Low G) - Expanded Nodes: {low_g_expansions}, Runtime: {low_g_time:.6f} sec")
+        print(f"Adaptive A* - Expanded Nodes: {adaptive_expansions}, Runtime: {adaptive_time:.6f} sec")
+
+    print("\nFinal Results:")
+    print("Gridworld, Repeated A* (High G) Expansions, Repeated A* (Low G) Expansions, Adaptive A* Expansions, High G Runtime, Low G Runtime, Adaptive A* Runtime")
+    for result in results:
+        print(f"{result[0]}, {result[1]}, {result[2]}, {result[3]}, {result[4]:.6f}, {result[5]:.6f}, {result[6]:.6f}")
