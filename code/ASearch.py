@@ -107,9 +107,9 @@ class RepeatedAStar:
         plt.show()
     
     def run_experiment(self):
-        start_time = time.time()  
+        start_time = time.perf_counter()  #Uses a higher precision timer
         path = self.search()
-        end_time = time.time()  
+        end_time = time.perf_counter()  
         runtime = end_time - start_time
         return self.expanded_nodes, runtime, path
 
@@ -133,3 +133,4 @@ def run_experiment():
 
 if __name__ == "__main__":
     run_experiment()
+
