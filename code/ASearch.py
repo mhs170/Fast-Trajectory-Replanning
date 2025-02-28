@@ -12,11 +12,11 @@ class PriorityQueue:
     def empty(self):
         return len(self.elements) == 0
     
-    def put(self, item, priority):
-        heapq.heappush(self.elements, (priority, random.random(), item))  # Ensure random tie-breaking
+    def put(self, node, priority):
+        heapq.heappush(self.elements, (priority, -node.g_cost, random.random(), node))  # Correct tie-breaking order
     
     def get(self):
-        return heapq.heappop(self.elements)[2]
+        return heapq.heappop(self.elements)[3]
 
 class RepeatedAStar:
     def __init__(self, gridworld, forward=True):
@@ -107,11 +107,12 @@ class RepeatedAStar:
         plt.show()
     
     def run_experiment(self):
-        start_time = time.perf_counter()  #Uses a higher precision timer
+        start_time = time.perf_counter()  # Higher precision timer
         path = self.search()
         end_time = time.perf_counter()  
         runtime = end_time - start_time
-        return self.expanded_nodes, runtime, path
+        success = path is not None
+        return self.expanded_nodes, runtime, success, path
 
 def run_experiment():
     grid_id = int(input("Enter gridworld number (1-50): "))
@@ -122,15 +123,20 @@ def run_experiment():
     forward = True if search_type == '1' else False
     
     repeated_a_star = RepeatedAStar(grid_world, forward=forward)
-    expanded_nodes, runtime, path = repeated_a_star.run_experiment()
+    expanded_nodes, runtime, success, path = repeated_a_star.run_experiment()
     
+    result_status = "Path Found" if success else "No Path Found"
     print(f"Grid: {filename}")
     print(f"Search Type: {'Forward A*' if forward else 'Reverse A*'}")
     print(f"Expanded Nodes: {expanded_nodes}")
     print(f"Runtime: {runtime:.6f} sec")
+    print(f"Result: {result_status}")
     
-    repeated_a_star.visualize_path()
+    if success:
+        repeated_a_star.visualize_path()
 
 if __name__ == "__main__":
     run_experiment()
+
+
 
