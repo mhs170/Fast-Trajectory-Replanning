@@ -113,12 +113,13 @@ class AdaptiveAStar(RepeatedAStar):
 
 if __name__ == "__main__":
     results = []
+    adaptive_faster = 0
+    repeated_faster = 0
 
     for i in range(1, 51):
         filename = f"gridworld_{i}.txt"  
         print(f"\nRunning experiment for {filename}:")
         grid_world = GridWorld.load_from_file(filename)
-
 
         repeated_high_g = RepeatedAStar(grid_world, tie_breaking='high_g')
         high_g_expansions, high_g_time = repeated_high_g.run_experiment()
@@ -135,7 +136,15 @@ if __name__ == "__main__":
         print(f"Repeated A* (Low G) - Expanded Nodes: {low_g_expansions}, Runtime: {low_g_time:.6f} sec")
         print(f"Adaptive A* - Expanded Nodes: {adaptive_expansions}, Runtime: {adaptive_time:.6f} sec")
 
+        if adaptive_time < high_g_time:
+            adaptive_faster += 1
+        else:
+            repeated_faster += 1
+
     print("\nFinal Results:")
     print("Gridworld, Repeated A* (High G) Expansions, Repeated A* (Low G) Expansions, Adaptive A* Expansions, High G Runtime, Low G Runtime, Adaptive A* Runtime")
     for result in results:
         print(f"{result[0]}, {result[1]}, {result[2]}, {result[3]}, {result[4]:.6f}, {result[5]:.6f}, {result[6]:.6f}")
+
+    print(f"\nAdaptive A* had a faster runtime in {adaptive_faster} out of 50 cases.")
+    print(f"Repeated Forward A* (high g-values) had a faster runtime in {repeated_faster} out of 50 cases.")
