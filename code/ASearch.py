@@ -1,6 +1,8 @@
 import heapq
 import time
 import random
+import numpy as np
+import matplotlib.pyplot as plt
 from gridworld_gen import GridWorld
 
 class PriorityQueue:
@@ -26,6 +28,7 @@ class RepeatedAStar:
         self.closed_list = set()
         self.initialize_nodes()
         self.expanded_nodes = 0
+        self.path = []
     
     def initialize_nodes(self):
         for row in self.grid:
@@ -48,7 +51,8 @@ class RepeatedAStar:
             current = self.open_list.get()
             self.expanded_nodes += 1
             if current == self.goal:
-                return self.reconstruct_path()
+                self.path = self.reconstruct_path()
+                return self.path
             
             if (current.x, current.y) not in self.closed_list:
                 self.closed_list.add((current.x, current.y))
@@ -81,6 +85,27 @@ class RepeatedAStar:
         path.reverse()
         return path
     
+    def visualize_path(self):
+        grid_size = len(self.grid)
+        grid_matrix = np.ones((grid_size, grid_size, 3))  # Default white (unblocked cells)
+        
+        for row in self.grid:
+            for node in row:
+                if node.node_type == 1:
+                    grid_matrix[node.x, node.y] = [0, 0, 0]  # Black for obstacles
+        
+        for x, y in self.path:
+            if (x, y) != (self.start.x, self.start.y) and (x, y) != (self.goal.x, self.goal.y):
+                grid_matrix[x, y] = [0.0, 0.0, 1.0]  # Blue for path
+        
+        grid_matrix[self.start.x, self.start.y] = [0.5, 1.0, 0.0]  # Lime Green for start node
+        grid_matrix[self.goal.x, self.goal.y] = [1.0, 0.0, 0.0]  # Red for goal node
+        
+        plt.figure(figsize=(8, 8))
+        plt.imshow(grid_matrix, origin='upper')
+        plt.title("Repeated A* Path Visualization - " + ("Forward" if self.forward else "Reverse"))
+        plt.show()
+    
     def run_experiment(self):
         start_time = time.time()  
         path = self.search()
@@ -88,28 +113,23 @@ class RepeatedAStar:
         runtime = end_time - start_time
         return self.expanded_nodes, runtime, path
 
-def compare_methods():
-    results = []
-    for i in range(1, 51):
-        filename = f"gridworld_{i}.txt"  
-        print(f"\nRunning experiment for {filename}:")
-        grid_world = GridWorld.load_from_file(filename)
-
-        forward_search = RepeatedAStar(grid_world, forward=True)
-        forward_expansions, forward_time, forward_path = forward_search.run_experiment()
-
-        backward_search = RepeatedAStar(grid_world, forward=False)
-        backward_expansions, backward_time, backward_path = backward_search.run_experiment()
-
-        results.append((filename, forward_expansions, backward_expansions, forward_time, backward_time))
-
-        print(f"Repeated Forward A* - Expanded Nodes: {forward_expansions}, Runtime: {forward_time:.6f} sec")
-        print(f"Repeated Backward A* - Expanded Nodes: {backward_expansions}, Runtime: {backward_time:.6f} sec")
-
-    print("\nFinal Results:")
-    print("Gridworld, Forward Expansions, Backward Expansions, Forward Time, Backward Time")
-    for result in results:
-        print(f"{result[0]}, {result[1]}, {result[2]}, {result[3]:.6f}, {result[4]:.6f}")
+def run_experiment():
+    grid_id = int(input("Enter gridworld number (1-50): "))
+    filename = f"gridworld_{grid_id}.txt"
+    
+    grid_world = GridWorld.load_from_file(filename)
+    search_type = input("Select search type (1: Forward A*, 2: Reverse A*): ")
+    forward = True if search_type == '1' else False
+    
+    repeated_a_star = RepeatedAStar(grid_world, forward=forward)
+    expanded_nodes, runtime, path = repeated_a_star.run_experiment()
+    
+    print(f"Grid: {filename}")
+    print(f"Search Type: {'Forward A*' if forward else 'Reverse A*'}")
+    print(f"Expanded Nodes: {expanded_nodes}")
+    print(f"Runtime: {runtime:.6f} sec")
+    
+    repeated_a_star.visualize_path()
 
 if __name__ == "__main__":
-    compare_methods()
+    run_experiment()
