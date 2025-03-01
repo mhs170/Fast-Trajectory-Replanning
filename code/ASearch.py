@@ -86,7 +86,6 @@ class RepeatedAStar:
             current = current.parent
         path.reverse()
         return path
-    
     def visualize_path(self):
         grid_size = len(self.grid)
         grid_matrix = np.ones((grid_size, grid_size, 3))  # Default white (unblocked cells)
@@ -103,10 +102,17 @@ class RepeatedAStar:
         grid_matrix[self.start.x, self.start.y] = [0.5, 1.0, 0.0]  # Lime Green for start node
         grid_matrix[self.goal.x, self.goal.y] = [1.0, 0.0, 0.0]  # Red for goal node
         
-        plt.figure(figsize=(8, 8))
-        plt.imshow(grid_matrix, origin='upper')
+        fig, ax = plt.subplots(figsize=(8, 8))
+        ax.imshow(grid_matrix, origin='upper')
+
+        ax.set_xticks(np.arange(-0.5, grid_size, 1), minor=True)
+        ax.set_yticks(np.arange(-0.5, grid_size, 1), minor=True)
+        ax.grid(which="minor", color="black", linestyle='-', linewidth=0.5)
+        ax.tick_params(which="both", bottom=False, left=False, labelbottom=False, labelleft=False)
+        
         plt.title("Repeated A* Path Visualization - " + ("Forward" if self.forward else "Reverse"))
         plt.show()
+    
     
     def run_experiment(self):
         start_time = time.perf_counter()  # Higher precision timer
@@ -139,3 +145,5 @@ def run_experiment():
 
 if __name__ == "__main__":
     run_experiment()
+
+
