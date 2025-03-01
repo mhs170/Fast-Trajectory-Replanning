@@ -13,14 +13,12 @@ class PriorityQueue:
         return len(self.elements) == 0
     
     def put(self, node, priority):
-        # Apply randomness only when g-values are equal
-        g_cost_values = {-elem[1] for elem in self.elements}  # Extract all g-costs in queue
+        g_cost_values = {-elem[1] for elem in self.elements}
         random_tiebreaker = random.random() if -node.g_cost in g_cost_values else 0
-        
-        heapq.heappush(self.elements, (priority, -node.g_cost, random_tiebreaker, node.x, node.y, node))  # Ensure deterministic tie-breaking except for equal g-values
+        heapq.heappush(self.elements, (priority, -node.g_cost, random_tiebreaker, node.x, node.y, node))
     
     def get(self):
-        _, _, _, _, _, node = heapq.heappop(self.elements)  # Unpack correctly to extract the node
+        _, _, _, _, _, node = heapq.heappop(self.elements)
         return node
 
 class RepeatedAStar:
@@ -46,7 +44,7 @@ class RepeatedAStar:
         return abs(node1.x - node2.x) + abs(node1.y - node2.y)
     
     def get_priority(self, node):
-        return node.g_cost + node.h_cost - node.g_cost * 1e-6  # Favor larger g-values
+        return node.g_cost + node.h_cost - node.g_cost * 1e-6
     
     def search(self):
         self.start.g_cost = 0
@@ -93,29 +91,32 @@ class RepeatedAStar:
     
     def visualize_path(self):
         grid_size = len(self.grid)
-        grid_matrix = np.ones((grid_size, grid_size, 3))  # Default white (unblocked cells)
+        grid_matrix = np.ones((grid_size, grid_size, 3))
         
         for row in self.grid:
             for node in row:
                 if node.node_type == 1:
-                    grid_matrix[node.x, node.y] = [0, 0, 0]  # Black for obstacles
+                    grid_matrix[node.x, node.y] = [0, 0, 0]  
         
         for x, y in self.path:
             if (x, y) != (self.start.x, self.start.y) and (x, y) != (self.goal.x, self.goal.y):
-                grid_matrix[x, y] = [0.0, 0.0, 1.0]  # Blue for path
+                grid_matrix[x, y] = [0.0, 0.0, 1.0] 
         
-        grid_matrix[self.start.x, self.start.y] = [0.5, 1.0, 0.0]  # Lime Green for start node
-        grid_matrix[self.goal.x, self.goal.y] = [1.0, 0.0, 0.0]  # Red for goal node
+        grid_matrix[self.start.x, self.start.y] = [0.5, 1.0, 0.0]  
+        grid_matrix[self.goal.x, self.goal.y] = [1.0, 0.0, 0.0]  
         
         plt.figure(figsize=(8, 8))
         plt.imshow(grid_matrix, origin='upper')
+        plt.xticks(np.arange(-0.5, grid_size, 1), [])
+        plt.yticks(np.arange(-0.5, grid_size, 1), [])
+        plt.grid(which='major', color='black', linestyle='-', linewidth=0.5)
         plt.title("Repeated A* Path Visualization - " + ("Forward" if self.forward else "Reverse"))
         plt.show()
     
     def run_experiment(self):
-        start_time = time.perf_counter()  # Higher precision timer
+        start_time = time.perf_counter()
         path = self.search()
-        end_time = time.perf_counter()  
+        end_time = time.perf_counter()
         runtime = end_time - start_time
         success = path is not None
         return self.expanded_nodes, runtime, success, path
@@ -143,4 +144,3 @@ def run_experiment():
 
 if __name__ == "__main__":
     run_experiment()
-
