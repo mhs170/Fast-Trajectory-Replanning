@@ -8,7 +8,6 @@ def install_package(package):
         subprocess.check_call([sys.executable, "-m", "pip", "install", package])
         print(f"{package} installed successfully!")
 
-# Install required packages if not already installed
 install_package("numpy")
 install_package("matplotlib")
 import numpy as np
@@ -17,11 +16,10 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import os
 
-# Constants
 SIZE = 101  
 NUM_GRIDS = 50  
-BLOCK_CLUSTER_PROB = 0.3  # Probability of starting a block cluster
-CLUSTER_GROWTH_PROB = 0.5  # Probability of growing the cluster
+BLOCK_CLUSTER_PROB = 0.3 
+CLUSTER_GROWTH_PROB = 0.5  
 SAVE_DIRECTORY = os.path.join(os.path.dirname(__file__), "gridworlds")
 
 class GridNode:
@@ -34,14 +32,11 @@ class GridNode:
         self.parent = None
 
     def f_cost(self):
-        #Returns the total cost (g + h) for pathfinding.
         return self.g_cost + self.h_cost
     
     def __lt__(self, other):
-        # Compare f-cost first
         if self.f_cost() != other.f_cost():
             return self.f_cost() < other.f_cost()
-        # Tie-breaker: prefer nodes with a higher g-cost
         return self.g_cost > other.g_cost
 
 class GridWorld:
@@ -75,7 +70,7 @@ class GridWorld:
     
     def get_unvisited_neighbors(self, x, y):
         neighbors = []
-        directions = [(1, 0), (-1, 0), (0, 1), (0, -1)] #Right, Left, Down, Up
+        directions = [(1, 0), (-1, 0), (0, 1), (0, -1)] 
         random.shuffle(directions)
         for dx, dy in directions:
             x_new, y_new = x + dx, y + dy
@@ -101,8 +96,8 @@ class GridWorld:
 
         self.start_node = self.grid[start_pos[0]][start_pos[1]]
         self.target_node = self.grid[target_pos[0]][target_pos[1]]
-        self.start_node.node_type = 2  # Start node (Lime)
-        self.target_node.node_type = 3  # Target node (Red)
+        self.start_node.node_type = 2   
+        self.target_node.node_type = 3  
     
     def save_to_file(self, filename):
         os.makedirs(SAVE_DIRECTORY, exist_ok=True)
@@ -131,9 +126,8 @@ class GridWorld:
         return obj
 
     def visualize(self):
-        #Displays the grid with start and target nodes.
         fig, ax = plt.subplots(figsize=(8, 8))
-        cmap = {0: "white", 1: "black", 2: "lime", 3: "red"}  # Add colors for start & target
+        cmap = {0: "white", 1: "black", 2: "lime", 3: "red"} 
 
         color_grid = np.zeros((SIZE, SIZE, 3))
         for x in range(SIZE):
@@ -177,5 +171,4 @@ if __name__ == "__main__":
     grid_to_display = GridWorld.load_from_file(f"gridworld_{grid_choice}.txt")
     grid_to_display.visualize()
 
-    # else:
-    #     print("Invalid option! Please enter 1 or 2.")
+
