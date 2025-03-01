@@ -13,8 +13,9 @@ class PriorityQueue:
         return len(self.elements) == 0
     
     def put(self, node, priority):
-        heapq.heappush(self.elements, (priority, -node.g_cost, random.random(), node))  # Correct tie-breaking order
-    
+        # Correct tie-breaking: f-value (primary) → higher g-value (secondary) → random (last resort)
+        heapq.heappush(self.elements, (priority, -node.g_cost, random.random(), node))
+
     def get(self):
         return heapq.heappop(self.elements)[3]
 
@@ -41,8 +42,8 @@ class RepeatedAStar:
         return abs(node1.x - node2.x) + abs(node1.y - node2.y)
     
     def get_priority(self, node):
-        return node.g_cost + node.h_cost - node.g_cost * 1e-6  # Favor larger g-values
-    
+        return node.g_cost + node.h_cost  # Standard A* priority (f-value)
+
     def search(self):
         self.start.g_cost = 0
         self.open_list.put(self.start, self.get_priority(self.start))
@@ -101,8 +102,14 @@ class RepeatedAStar:
         grid_matrix[self.start.x, self.start.y] = [0.5, 1.0, 0.0]  # Lime Green for start node
         grid_matrix[self.goal.x, self.goal.y] = [1.0, 0.0, 0.0]  # Red for goal node
         
-        plt.figure(figsize=(8, 8))
-        plt.imshow(grid_matrix, origin='upper')
+        fig, ax = plt.subplots(figsize=(8, 8))
+        ax.imshow(grid_matrix, origin='upper')
+
+        ax.set_xticks(np.arange(-0.5, grid_size, 1), minor=True)
+        ax.set_yticks(np.arange(-0.5, grid_size, 1), minor=True)
+        ax.grid(which="minor", color="black", linestyle='-', linewidth=0.5)
+        ax.tick_params(which="both", bottom=False, left=False, labelbottom=False, labelleft=False)
+        
         plt.title("Repeated A* Path Visualization - " + ("Forward" if self.forward else "Reverse"))
         plt.show()
     
@@ -137,6 +144,3 @@ def run_experiment():
 
 if __name__ == "__main__":
     run_experiment()
-
-
-

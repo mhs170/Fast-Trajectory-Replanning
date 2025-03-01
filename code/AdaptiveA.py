@@ -112,10 +112,17 @@ class RepeatedAStar:
         grid_matrix[self.start.x, self.start.y] = [0.5, 1.0, 0.0]  # Lime Green for start node
         grid_matrix[self.target.x, self.target.y] = [1.0, 0.0, 0.0]  # Red for goal node
         
-        plt.figure(figsize=(8, 8))
-        plt.imshow(grid_matrix, origin='upper')
-        plt.title("A* Path Visualization")
+        fig, ax = plt.subplots(figsize=(8, 8))
+        ax.imshow(grid_matrix, origin='upper')
+
+        ax.set_xticks(np.arange(-0.5, grid_size, 1), minor=True)
+        ax.set_yticks(np.arange(-0.5, grid_size, 1), minor=True)
+        ax.grid(which="minor", color="black", linestyle='-', linewidth=0.5)
+        ax.tick_params(which="both", bottom=False, left=False, labelbottom=False, labelleft=False)
+
+        plt.title("A* Path Visualization with Grid")
         plt.show()
+
     
     def run_experiment(self):
         start_time = time.time()  
@@ -128,7 +135,6 @@ if __name__ == "__main__":
     grid_number = input("Enter gridworld number (1-50): ")
     filename = f"gridworld_{grid_number}.txt"
     
-    # Construct the full path to the gridworld file inside the "gridworlds" folder
     file_path = os.path.join(os.path.dirname(__file__), "gridworlds", filename)
 
     if not os.path.exists(file_path):

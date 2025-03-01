@@ -186,10 +186,18 @@ class AdaptiveAStar:
         grid_matrix[self.start.x, self.start.y] = [0.5, 1.0, 0.0]  # Lime Green for start node
         grid_matrix[self.target.x, self.target.y] = [1.0, 0.0, 0.0]  # Red for goal node
         
-        plt.figure(figsize=(8, 8))
-        plt.imshow(grid_matrix, origin='upper')
+        fig, ax = plt.subplots(figsize=(8, 8))
+        ax.imshow(grid_matrix, origin='upper')
+
+        # Adding grid lines
+        ax.set_xticks(np.arange(-0.5, grid_size, 1), minor=True)
+        ax.set_yticks(np.arange(-0.5, grid_size, 1), minor=True)
+        ax.grid(which="minor", color="black", linestyle='-', linewidth=0.5)
+        ax.tick_params(which="both", bottom=False, left=False, labelbottom=False, labelleft=False)
+
         plt.title("A* Path Visualization")
         plt.show()
+
     
     def run_experiment(self):
         start_time = time.time()  
