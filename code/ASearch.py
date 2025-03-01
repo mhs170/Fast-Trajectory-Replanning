@@ -13,10 +13,14 @@ class PriorityQueue:
         return len(self.elements) == 0
     
     def put(self, node, priority):
-        heapq.heappush(self.elements, (priority, -node.g_cost, node.x, node.y, node))  # Ensure deterministic tie-breaking
+        # Apply randomness only when g-values are equal
+        g_cost_values = {-elem[1] for elem in self.elements}  # Extract all g-costs in queue
+        random_tiebreaker = random.random() if -node.g_cost in g_cost_values else 0
+        
+        heapq.heappush(self.elements, (priority, -node.g_cost, random_tiebreaker, node.x, node.y, node))  # Ensure deterministic tie-breaking except for equal g-values
     
     def get(self):
-        _, _, _, _, node = heapq.heappop(self.elements)  # Unpack correctly to extract the node
+        _, _, _, _, _, node = heapq.heappop(self.elements)  # Unpack correctly to extract the node
         return node
 
 class RepeatedAStar:
